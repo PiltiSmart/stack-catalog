@@ -1,0 +1,11 @@
+services:
+  kabiPayment:
+    image: piltismartsolutions/thingsboard-3.8.1:v-4.1.2
+    container_name: Thingsboard-test
+    ports:
+      - "${TB_HTTP_PORT:-80}:80"
+      - "${TB_MQTT_PORT:-1883}:1883"
+      - "${TB_RPC_PORT:-7070}:7070"
+    env_file:
+      - ./.tb.env
+    restart: always

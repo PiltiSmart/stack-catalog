@@ -1,0 +1,35 @@
+{
+  "version": "1.0.0",
+  "organization": "PiltiSmart",
+  "updated_at": "2026-09-11",
+  "stacks": [
+    {
+      "id": "tb-stack",
+      "name": "ThingsBoard Microservices Stack",
+      "version": "3.8.1",
+      "description": "3-component enterprise stack: TimescaleDB, ThingsBoard Core, and ThingsBoard Edge",
+      "path": "stacks/tb-stack",
+      "components": [
+        {
+          "name": "tb-db",
+          "description": "TimescaleDB PostgreSQL Database",
+          "compose_file": "tb-db/docker-compose.yml",
+          "default_port": 5432
+        },
+        {
+          "name": "tb",
+          "description": "ThingsBoard Core Application",
+          "compose_file": "tb/docker-compose.yml",
+          "env_file": "tb/.tb.env.template",
+          "default_ports": [80, 1883, 7070]
+        },
+        {
+          "name": "edge-tb",
+          "description": "ThingsBoard Edge with Local Postgres",
+          "compose_file": "edge-tb/docker-compose.yml",
+          "default_ports": [8082, 1884, "5683-5688/udp"]
+        }
+      ]
+    }
+  ]
+}
