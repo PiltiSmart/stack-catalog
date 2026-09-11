@@ -14,17 +14,48 @@ The `ps` CLI pulls dynamic compose manifests and configuration blueprints direct
 
 ---
 
-## 🚀 Quick Installation via 'ps' CLI
+## ⚡ Install the 'ps' CLI Globally (Linux & macOS)
 
-Install any stack from this catalog using the compiled `ps` CLI:
+Install the standalone enterprise `ps` CLI with a single command:
 
 ```bash
-# Pre-flight health and dependency checks:
+curl -fsSL https://raw.githubusercontent.com/PiltiSmart/stack-catalog/main/install.sh | bash
+```
+
+> See [INSTALL.md](INSTALL.md) for manual download links for Linux, Apple Silicon / Intel Mac, and Windows.
+
+---
+
+## 🚀 Deploying Stacks via 'ps' CLI
+
+Once `ps` is installed, you can orchestrate any stack from this catalog on your nodes:
+
+```bash
+# 1. Pre-flight health and dependency checks:
 ps doctor
 
-# Install the ThingsBoard 3-component stack dynamically from GitHub:
+# 2. Discover stacks dynamically from this repository:
+ps catalog
+
+# 3. Install and deploy the ThingsBoard 3-component stack:
 ps install tb-stack
 
-# Inspect running stack status:
+# 4. Inspect live running container status:
 ps status
+
+# 5. Teardown or restart stack:
+ps stack down
+ps stack restart
 ```
+
+---
+
+## 🔨 Building the CLI Locally from Source
+
+```bash
+cd cli
+./build.sh
+# Or install globally:
+make install
+```
+
