@@ -21,7 +21,7 @@ NC='\033[0m'
 echo -e "${CYAN}${BOLD}"
 echo "=========================================================="
 echo "    PiltiSmart 'pilti' Enterprise CLI Installer"
-echo "    Target: Linux & macOS (Darwin)"
+echo "    Target: Linux and macOS (Darwin)"
 echo "=========================================================="
 echo -e "${NC}"
 
@@ -122,6 +122,7 @@ if command -v "${BINARY_NAME}" >/dev/null 2>&1; then
     echo ""
     echo -e "Run ${BOLD}'pilti list'${NC} to view all software components."
     echo -e "Run ${BOLD}'pilti doctor'${NC} for health diagnostics."
+    echo -e "Run ${BOLD}'pilti --help'${NC} to get started."
 else
     echo -e "${YELLOW}[!] '${BINARY_NAME}' installed to ${INSTALL_DIR}, but ${INSTALL_DIR} is not in your current PATH.${NC}"
     echo -e "Add it to your shell configuration (.bashrc, .zshrc):"
