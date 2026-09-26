@@ -35,7 +35,6 @@
           "compose_file": "docker-compose.yml",
           "env_file": ".tb.env.template",
           "default_ports": [
-            80,
             8080,
             1883,
             7070
@@ -78,7 +77,7 @@
           "description": "Jenkins LTS Controller",
           "compose_file": "docker-compose.yml",
           "default_ports": [
-            "80:8080",
+            "8085:8080",
             50000
           ]
         }
@@ -98,7 +97,7 @@
           "compose_file": "docker-compose.yml",
           "env_file": ".piltiservices.env.template",
           "default_ports": [
-            80
+            "9000:80"
           ]
         }
       ]
@@ -135,7 +134,7 @@
           "compose_file": "docker-compose.yml",
           "env_file": ".pmx.env.template",
           "default_ports": [
-            80
+            "8088:80"
           ]
         }
       ]
