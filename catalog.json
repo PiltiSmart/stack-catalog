@@ -1,36 +1,62 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "organization": "PiltiSmart",
   "updated_at": "2026-09-26",
   "stacks": [
     {
-      "id": "tb-stack",
-      "name": "ThingsBoard Microservices Stack",
-      "version": "3.8.1",
-      "description": "3-component enterprise stack: TimescaleDB, ThingsBoard Core, and ThingsBoard Edge",
-      "path": "stacks/tb-stack",
+      "id": "tb-db",
+      "name": "TimescaleDB / PostgreSQL",
+      "version": "pg17",
+      "description": "High-performance telemetry & relational time-series database (Install 1st)",
+      "path": "stacks/tb-db",
+      "dependencies": [],
       "components": [
         {
-          "name": "tb-db",
+          "name": "tb-timescaledb",
           "description": "TimescaleDB PostgreSQL Database",
-          "compose_file": "tb-db/docker-compose.yml",
+          "compose_file": "docker-compose.yml",
           "default_port": 5432
-        },
+        }
+      ]
+    },
+    {
+      "id": "tb-app",
+      "name": "ThingsBoard Core Application",
+      "version": "3.8.1",
+      "description": "ThingsBoard enterprise IoT server & device orchestrator (Requires tb-db first)",
+      "path": "stacks/tb-app",
+      "dependencies": [
+        "tb-db"
+      ],
+      "components": [
         {
-          "name": "tb",
-          "description": "ThingsBoard Core Application",
-          "compose_file": "tb/docker-compose.yml",
-          "env_file": "tb/.tb.env.template",
+          "name": "Thingsboard-test",
+          "description": "ThingsBoard Core Application Server",
+          "compose_file": "docker-compose.yml",
+          "env_file": ".tb.env.template",
           "default_ports": [
             80,
+            8080,
             1883,
             7070
           ]
-        },
+        }
+      ]
+    },
+    {
+      "id": "tb-edge",
+      "name": "ThingsBoard Edge Gateway",
+      "version": "3.9.1EDGE",
+      "description": "Local autonomous ThingsBoard Edge instance (Requires tb-app first)",
+      "path": "stacks/tb-edge",
+      "dependencies": [
+        "tb-app"
+      ],
+      "components": [
         {
-          "name": "edge-tb",
-          "description": "ThingsBoard Edge with Local Postgres",
-          "compose_file": "edge-tb/docker-compose.yml",
+          "name": "mytbedge",
+          "description": "ThingsBoard Edge Gateway with local Postgres",
+          "compose_file": "docker-compose.yml",
           "default_ports": [
             8082,
             1884,
@@ -45,6 +71,7 @@
       "version": "lts",
       "description": "Automated build, test, and release controller engine with Docker socket integration",
       "path": "stacks/jenkins",
+      "dependencies": [],
       "components": [
         {
           "name": "jenkins",
@@ -63,9 +90,10 @@
       "version": "v7.10.7",
       "description": "PiltiSmart specialized API backend microservices with Infisical secret management",
       "path": "stacks/piltiservices",
+      "dependencies": [],
       "components": [
         {
-          "name": "piltiservice",
+          "name": "piltiservices-test",
           "description": "PiltiSmart Services Backend",
           "compose_file": "docker-compose.yml",
           "env_file": ".piltiservices.env.template",
@@ -81,6 +109,7 @@
       "version": "4.1.1",
       "description": "Apache Kafka KRaft distributed event streaming and message broker",
       "path": "stacks/kafka",
+      "dependencies": [],
       "components": [
         {
           "name": "kafka",
@@ -98,6 +127,7 @@
       "version": "v8.4.41",
       "description": "Hybrid cloud synchronization connector and remote tunnel with Kafka bridge",
       "path": "stacks/pilticloud",
+      "dependencies": [],
       "components": [
         {
           "name": "piltiCloud",
