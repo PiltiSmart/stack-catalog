@@ -1,30 +1,41 @@
 # PiltiSmart Stack Catalog
 
-Official centralized microservice and IoT stack catalog repository for the PiltiSmart Enterprise CLI (`ps`).
+Official centralized microservice and IoT stack catalog repository for the PiltiSmart Enterprise CLI (pilti).
 
-The `ps` CLI pulls dynamic compose manifests and configuration blueprints directly from this repository during deployment (`ps install <stack-name>`).
+The pilti CLI pulls dynamic compose manifests and configuration blueprints directly from this repository during deployment (pilti install <stack-name>).
 
 ---
 
-## 📦 Available Stacks
+## 🚀 Available Stacks
 
 | Stack ID | Name | Version | Components |
 |---|---|---|---|
-| [`tb-stack`](stacks/tb-stack/) | **ThingsBoard Microservices Stack** | `3.8.1` | TimescaleDB (`tb-db`), ThingsBoard Core (`tb`), ThingsBoard Edge (`edge-tb`) |
+| [	b-stack](stacks/tb-stack/) | **ThingsBoard Microservices Stack** | 3.8.1 | TimescaleDB (	b-db), ThingsBoard Core (	b), ThingsBoard Edge (edge-tb) |
+| [jenkins](stacks/jenkins/) | **Jenkins CI/CD Automation** | lts | Jenkins LTS Controller (jenkins) |
+| [piltiservices](stacks/piltiservices/) | **PiltiSmart Microservices** | 7.10.7 | PiltiSmart Microservices Backend (piltiservices-test) |
+| [kafka](stacks/kafka/) | **Apache Kafka Broker** | 4.1.1 | Apache Kafka KRaft Broker & Controller (kafka) |
+| [pilticloud](stacks/pilticloud/) | **PiltiSmart Cloud Gateway** | 8.4.41 | PiltiCloud PMX Service (piltiCloud) |
 
 ---
 
-## 🚀 Quick Installation via 'ps' CLI
+## ⚡ Quick Installation via 'pilti' CLI
 
-Install any stack from this catalog using the compiled `ps` CLI:
+Install any stack from this catalog using the pilti CLI:
 
-```bash
+`ash
 # Pre-flight health and dependency checks:
-ps doctor
+pilti doctor
 
-# Install the ThingsBoard 3-component stack dynamically from GitHub:
-ps install tb-stack
+# List available stacks in remote catalog:
+pilti catalog
 
-# Inspect running stack status:
-ps status
-```
+# Install individual tools / stacks:
+pilti install jenkins
+pilti install piltiservices
+pilti install kafka
+pilti install pilticloud
+pilti install tb-stack
+
+# Inspect running container status:
+pilti status
+`

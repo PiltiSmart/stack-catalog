@@ -1,7 +1,7 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "PiltiSmart",
-  "updated_at": "2026-09-11",
+  "updated_at": "2026-09-26",
   "stacks": [
     {
       "id": "tb-stack",
@@ -21,13 +21,92 @@
           "description": "ThingsBoard Core Application",
           "compose_file": "tb/docker-compose.yml",
           "env_file": "tb/.tb.env.template",
-          "default_ports": [80, 1883, 7070]
+          "default_ports": [
+            80,
+            1883,
+            7070
+          ]
         },
         {
           "name": "edge-tb",
           "description": "ThingsBoard Edge with Local Postgres",
           "compose_file": "edge-tb/docker-compose.yml",
-          "default_ports": [8082, 1884, "5683-5688/udp"]
+          "default_ports": [
+            8082,
+            1884,
+            "5683-5688/udp"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jenkins",
+      "name": "Jenkins CI/CD Automation Engine",
+      "version": "lts",
+      "description": "Automated build, test, and release controller engine with Docker socket integration",
+      "path": "stacks/jenkins",
+      "components": [
+        {
+          "name": "jenkins",
+          "description": "Jenkins LTS Controller",
+          "compose_file": "docker-compose.yml",
+          "default_ports": [
+            "80:8080",
+            50000
+          ]
+        }
+      ]
+    },
+    {
+      "id": "piltiservices",
+      "name": "PiltiSmart Microservices Backend",
+      "version": "v7.10.7",
+      "description": "PiltiSmart specialized API backend microservices with Infisical secret management",
+      "path": "stacks/piltiservices",
+      "components": [
+        {
+          "name": "piltiservice",
+          "description": "PiltiSmart Services Backend",
+          "compose_file": "docker-compose.yml",
+          "env_file": ".piltiservices.env.template",
+          "default_ports": [
+            80
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kafka",
+      "name": "Apache Kafka Broker",
+      "version": "4.1.1",
+      "description": "Apache Kafka KRaft distributed event streaming and message broker",
+      "path": "stacks/kafka",
+      "components": [
+        {
+          "name": "kafka",
+          "description": "Apache Kafka Broker & Controller",
+          "compose_file": "docker-compose.yml",
+          "default_ports": [
+            9092
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pilticloud",
+      "name": "PiltiSmart Cloud Gateway (PMX)",
+      "version": "v8.4.41",
+      "description": "Hybrid cloud synchronization connector and remote tunnel with Kafka bridge",
+      "path": "stacks/pilticloud",
+      "components": [
+        {
+          "name": "piltiCloud",
+          "description": "PiltiCloud Gateway Service",
+          "compose_file": "docker-compose.yml",
+          "env_file": ".pmx.env.template",
+          "default_ports": [
+            80
+          ]
         }
       ]
     }
