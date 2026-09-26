@@ -11,6 +11,7 @@ REPO="PiltiSmart/stack-catalog"
 INSTALL_DIR="/usr/local/bin"
 BINARY_NAME="pilti"
 
+# Color helpers
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -21,7 +22,7 @@ NC='\033[0m'
 echo -e "${CYAN}${BOLD}"
 echo "=========================================================="
 echo "    PiltiSmart 'pilti' Enterprise CLI Installer"
-echo "    Target: Linux and macOS (Darwin)"
+echo "    Target: Linux & macOS (Darwin)"
 echo "=========================================================="
 echo -e "${NC}"
 
@@ -64,7 +65,7 @@ if [ "$(id -u)" -ne 0 ]; then
     fi
 fi
 
-# 4. Resolve latest release binary
+# 4. Resolve latest release or compile locally if Go is available
 TMP_DIR=$(mktemp -d)
 cleanup() {
     rm -rf "${TMP_DIR}"
@@ -80,19 +81,18 @@ DOWNLOAD_SUCCESS=0
 if curl -sLf "${DOWNLOAD_URL}" -o "${TMP_DIR}/${BINARY_NAME}"; then
     DOWNLOAD_SUCCESS=1
 else
-    # Fallback to ps-* binary name
-    FALLBACK_URL="https://github.com/${REPO}/releases/latest/download/ps-${PLATFORM}-${TARGET_ARCH}"
-    if curl -sLf "${FALLBACK_URL}" -o "${TMP_DIR}/${BINARY_NAME}"; then
-        DOWNLOAD_SUCCESS=1
-    fi
-fi
-
-if [ ${DOWNLOAD_SUCCESS} -ne 1 ]; then
-    # Try compiling locally if Go is present
+    echo -e "${YELLOW}[!] Pre-compiled binary not yet found on GitHub Releases.${NC}"
+    # Check if we are inside the source directory or Go is available to build
     if command -v go >/dev/null 2>&1; then
-        echo -e "${CYAN}[i] Compiling locally from Go source...${NC}"
-        if [ -d "cli" ]; then
-            (cd cli && go mod tidy && go build -ldflags="-s -w" -o "${TMP_DIR}/${BINARY_NAME}" main.go)
+        echo -e "${CYAN}[i] Detected Go toolchain. Compiling from source...${NC}"
+        if [ -f "main.go" ]; then
+            go mod tidy
+            go build -ldflags="-s -w" -o "${TMP_DIR}/${BINARY_NAME}" main.go
+            DOWNLOAD_SUCCESS=1
+        else
+            echo -e "${CYAN}[i] Fetching repository to compile...${NC}"
+            git clone --depth 1 "https://github.com/${REPO}.git" "${TMP_DIR}/source"
+            (cd "${TMP_DIR}/source" && go mod tidy && go build -ldflags="-s -w" -o "${TMP_DIR}/${BINARY_NAME}" main.go)
             DOWNLOAD_SUCCESS=1
         fi
     fi
@@ -100,7 +100,7 @@ fi
 
 if [ ${DOWNLOAD_SUCCESS} -ne 1 ]; then
     echo -e "${RED}[ERROR] Failed to download or build 'pilti' binary.${NC}"
-    echo "Please ensure internet connectivity or install manually from: https://github.com/${REPO}/releases"
+    echo "Please ensure internet connectivity or install Go: https://go.dev/dl/"
     exit 1
 fi
 
@@ -115,22 +115,34 @@ ${SUDO} ln -sf "${INSTALL_DIR}/${BINARY_NAME}" "${INSTALL_DIR}/ps" 2>/dev/null |
 
 # 6. Install MinIO Client ('mc') and configure S3 alias
 echo -e "${CYAN}[3/4] Installing MinIO Client ('mc') for S3 operations...${NC}"
-MC_URL="https://dl.min.io/client/mc/release/${PLATFORM}-${TARGET_ARCH}/mc"
-if curl -sLf "${MC_URL}" -o "${TMP_DIR}/mc"; then
-    chmod +x "${TMP_DIR}/mc"
-    ${SUDO} cp "${TMP_DIR}/mc" "${INSTALL_DIR}/mc"
-    ${SUDO} chmod +x "${INSTALL_DIR}/mc"
-    echo -e "${GREEN}[✔] Installed 'mc' to ${INSTALL_DIR}/mc${NC}"
+MC_VERSION="RELEASE.2025-07-16T15-35-03Z"
+case "${PLATFORM}-${TARGET_ARCH}" in
+    linux-amd64)   MC_FILE="mc.linux-amd64.${MC_VERSION}";;
+    linux-arm64)   MC_FILE="mc.linux-arm64.${MC_VERSION}";;
+    darwin-amd64)  MC_FILE="mc.darwin-amd64.${MC_VERSION}";;
+    darwin-arm64)  MC_FILE="mc.darwin-arm64.${MC_VERSION}";;
+    *)             MC_FILE="";;
+esac
 
-    # Configure myminio alias
-    echo -e "${CYAN}[i] Configuring MinIO alias 'myminio' (http://145.241.237.108:9000)...${NC}"
-    "${INSTALL_DIR}/mc" alias set myminio http://145.241.237.108:9000 minioadmin minioadmin123 >/dev/null 2>&1 || true
-    if [ -n "${SUDO}" ]; then
-        ${SUDO} "${INSTALL_DIR}/mc" alias set myminio http://145.241.237.108:9000 minioadmin minioadmin123 >/dev/null 2>&1 || true
+if [ -n "${MC_FILE}" ]; then
+    MC_URL="https://github.com/minio/mc/releases/download/${MC_VERSION}/${MC_FILE}"
+    echo -e "${CYAN}[i] Downloading 'mc' from: ${MC_URL}...${NC}"
+    if curl -sSLf "${MC_URL}" -o "${TMP_DIR}/mc"; then
+        chmod +x "${TMP_DIR}/mc"
+        ${SUDO} cp "${TMP_DIR}/mc" "${INSTALL_DIR}/mc"
+        ${SUDO} chmod +x "${INSTALL_DIR}/mc"
+        echo -e "${GREEN}[✔] Installed 'mc' to ${INSTALL_DIR}/mc${NC}"
+
+        # Configure myminio alias
+        echo -e "${CYAN}[i] Configuring MinIO alias 'myminio' (http://145.241.237.108:9000)...${NC}"
+        "${INSTALL_DIR}/mc" alias set myminio http://145.241.237.108:9000 minioadmin minioadmin123 >/dev/null 2>&1 || true
+        if [ -n "${SUDO}" ]; then
+            ${SUDO} "${INSTALL_DIR}/mc" alias set myminio http://145.241.237.108:9000 minioadmin minioadmin123 >/dev/null 2>&1 || true
+        fi
+        echo -e "${GREEN}[✔] S3 / MinIO alias 'myminio' configured successfully!${NC}"
+    else
+        echo -e "${YELLOW}[!] Note: Could not download 'mc' from ${MC_URL}. 'pilti s3' will auto-install it on first run.${NC}"
     fi
-    echo -e "${GREEN}[✔] S3 / MinIO alias 'myminio' configured successfully!${NC}"
-else
-    echo -e "${YELLOW}[!] Note: Could not pre-fetch 'mc' from ${MC_URL}. 'pilti s3' will auto-install it on first run.${NC}"
 fi
 
 # 7. Verify installation
@@ -147,5 +159,5 @@ if command -v "${BINARY_NAME}" >/dev/null 2>&1; then
 else
     echo -e "${YELLOW}[!] '${BINARY_NAME}' installed to ${INSTALL_DIR}, but ${INSTALL_DIR} is not in your current PATH.${NC}"
     echo -e "Add it to your shell configuration (.bashrc, .zshrc):"
-    echo -e "    export PATH="${INSTALL_DIR}:\$PATH""
+    echo -e "    export PATH=\"${INSTALL_DIR}:\$PATH\""
 fi
